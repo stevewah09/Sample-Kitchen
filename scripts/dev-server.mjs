@@ -16,9 +16,10 @@ const server = createServer(async (request, response) => {
     return;
   }
 
-  if (request.url === '/' || request.url === '/index.html') {
-    response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-    response.end(await readFile(resolve(root, 'index.html')));
+  if (request.url === '/' || request.url === '/index.html' || request.url === '/app.js') {
+    const file = request.url === '/app.js' ? 'app.js' : 'index.html';
+    response.writeHead(200, { 'content-type': file === 'app.js' ? 'text/javascript; charset=utf-8' : 'text/html; charset=utf-8' });
+    response.end(await readFile(resolve(root, file)));
     return;
   }
 

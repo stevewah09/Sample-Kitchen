@@ -1,25 +1,13 @@
-let poolPromise;
-
-async function getPool() {
-  if (!poolPromise) {
-    poolPromise = import('pg').then(({ default: pg }) => new pg.Pool({
-      connectionString: process.env.DATABASE_URL,
-      max: 2,
-      idleTimeoutMillis: 5_000,
-      connectionTimeoutMillis: 3_000,
-    }));
-  }
-  return poolPromise;
-}
+import { databaseConfigured, getDatabase } from '../lib/database.js';
 
 export default {
   async fetch() {
-    if (!process.env.DATABASE_URL) {
+    if (!databaseConfigured()) {
       return Response.json({ status: 'ready', database: 'not_configured' });
     }
 
     try {
-      const pool = await getPool();
+      const pool = await getDatabase();
       await pool.query('SELECT 1');
       return Response.json({ status: 'ready', database: 'connected' });
     } catch {

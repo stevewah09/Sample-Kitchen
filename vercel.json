@@ -1,7 +1,9 @@
 {
+  "regions": ["sin1"],
   "functions": {
-    "api/**/*.js": {
-      "maxDuration": 10
+    "api/*.js": {
+      "maxDuration": 60,
+      "includeFiles": "{schema.sql,reference-data/*.json}"
     }
   }
 }

@@ -12,6 +12,5 @@ Mark an item done only after checking it. Add one short evidence note with a tes
 - [ ] Gmail draft appears unsent in my connected Gmail. Evidence:
 
 Next step: Implement validated stock, HR and CRM imports with Postgres persistence.
-Blocker, if any: A Postgres `DATABASE_URL` is not configured, so database seeding and persistence checks remain pending. Learner brief: `(Data) Kitchen Planner Operating Data/=MD File=/Kitchen_Planner_Learner_Brief.md`.
+Blocker, if any: The Vercel project has the sensitive Production `OPENAI_API_KEY`, but no Postgres integration or `DATABASE_URL` (verified without reading secret values). The latest Production `/api/health` returned HTTP 200 with `{"status":"ready","database":"not_configured"}`. The source currently contains only `/api/health`; there are no import endpoints or authenticated upload flow. Do not upload HR or CRM operating data until a database connection and access-controlled import path are deployed. Learner brief: `(Data) Kitchen Planner Operating Data/=MD File=/Kitchen_Planner_Learner_Brief.md`.
 ```
-

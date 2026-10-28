@@ -21,6 +21,23 @@
       .source { padding: 14px; border-radius: 10px; background: #f6f7f4; font-size: 14px; }
       .source strong { display: block; margin-bottom: 4px; }
       footer { margin-top: 22px; color: #77847e; font-size: 12px; }
+      h2 { margin: 0 0 12px; }
+      h3 { margin: 0 0 8px; }
+      form { margin-top: 12px; }
+      label { display: block; margin-bottom: 7px; font-weight: 650; font-size: 13px; }
+      input[type=file] { max-width: 100%; }
+      button { display: block; margin-top: 11px; padding: 9px 13px; border: 0; border-radius: 8px; background: #315c45; color: #fff; font: inherit; cursor: pointer; }
+      button:disabled { opacity: .45; cursor: not-allowed; }
+      .import-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); gap: 12px; }
+      .import-item { padding: 14px; border: 1px solid #d8ddd5; border-radius: 10px; }
+      .import-item p { font-size: 13px; margin: 5px 0; }
+      .error { color: #a32323; }
+      .scroll { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .draft-text { white-space: pre-wrap; padding: 12px; border-radius: 8px; background: #f6f7f4; }
+      th, td { padding: 8px; border-bottom: 1px solid #d8ddd5; text-align: left; vertical-align: top; }
+      th { background: #f6f7f4; }
+      [hidden] { display: none !important; }
     </style>
   </head>
   <body>
@@ -31,27 +48,34 @@
         <p>Plan production, staffing and purchasing from owner-imported operational data.</p>
       </header>
       <section class="card" aria-labelledby="setup-title">
-        <div class="status"><span class="dot" aria-hidden="true"></span><span id="setup-title">Application scaffold is running</span></div>
+        <div class="status"><span class="dot" aria-hidden="true"></span><span id="setup-title">Kitchen Planner backend</span></div>
         <p id="database-status">Checking backend status…</p>
-        <div class="sources" aria-label="Operational data status">
-          <div class="source"><strong>Stock count</strong>Not imported</div>
-          <div class="source"><strong>HR records</strong>Not imported</div>
-          <div class="source"><strong>Weekly orders</strong>Not imported</div>
+      </section>
+      <section class="card" aria-labelledby="imports-title">
+        <h2 id="imports-title">Owner imports</h2>
+        <p>Choose the five operational exports in order. The backend validates and saves each file in Postgres. A rejected file leaves the last saved plan available.</p>
+        <div id="import-grid" class="import-grid"></div>
+      </section>
+      <section class="card" aria-labelledby="plan-title">
+        <h2 id="plan-title">Next-week plan</h2>
+        <p id="plan-status">Waiting for imports.</p>
+        <div id="plan-content" hidden>
+          <h3>Production</h3><div id="production-table" class="scroll"></div>
+          <h3>Orders for manager review</h3><div id="exceptions-table" class="scroll"></div>
+          <h3>Named draft roster</h3><div id="roster-table" class="scroll"></div>
+          <h3>Stock request</h3><div id="stock-table" class="scroll"></div>
+          <h3>Human actions</h3><div id="actions-list"></div>
         </div>
       </section>
-      <footer>Reference settings are stored separately from operational imports. No sample plan is shown before imports.</footer>
+      <section id="agents-section" class="card" hidden>
+        <h2>Planning agents</h2>
+        <p>The verified numeric plan stays available if an agent call fails.</p>
+        <button id="run-agents" type="button">Run planning agents</button>
+        <p id="agent-status" role="status"></p>
+        <div id="agent-results"></div>
+      </section>
+      <footer>Reference settings are seeded on the server. Operational imports and agent results are stored in Postgres.</footer>
     </main>
-    <script>
-      fetch('/api/health').then(async response => {
-        const data = await response.json();
-        document.querySelector('#database-status').textContent = data.database === 'connected'
-          ? 'Backend connected to the planning database.'
-          : data.database === 'not_configured'
-            ? 'Backend is ready; persistent database connection is not configured yet.'
-            : 'Backend is running, but the database is unavailable.';
-      }).catch(() => {
-        document.querySelector('#database-status').textContent = 'Backend health check is unavailable.';
-      });
-    </script>
+    <script type="module" src="/app.js"></script>
   </body>
 </html>
