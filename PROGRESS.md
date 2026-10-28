@@ -8,9 +8,10 @@ Mark an item done only after checking it. Add one short evidence note with a tes
 - [ ] Verified calculations match the supplied rules. Evidence:
 - [ ] Run planning agents calls OpenAI and shows three recommendations and a handoff trace. Evidence:
 - [ ] Dashboard shows next-week plan, exceptions and action list. Evidence:
-- [ ] GitHub repository and Vercel frontend/backend work. URL and evidence:
+- [ ] GitHub repository and Vercel frontend/backend work. URL and evidence: Published project files to [stevewah09/Sample-Kitchen](https://github.com/stevewah09/Sample-Kitchen) on `main`; Vercel deployment remains pending.
 - [ ] Gmail draft appears unsent in my connected Gmail. Evidence:
 
 Next step: Implement validated stock, HR and CRM imports with Postgres persistence.
 Blocker, if any: A Postgres `DATABASE_URL` is not configured, so database seeding and persistence checks remain pending. Learner brief: `(Data) Kitchen Planner Operating Data/=MD File=/Kitchen_Planner_Learner_Brief.md`.
 ```
+
