@@ -129,7 +129,12 @@ async function loadDraft() {
     byId('draft-body').value = data.saved?.body || data.preview.body;
     byId('draft-reviewed').checked = false;
     const created = data.saved?.status === 'created';
+    const uncertain = data.saved?.status === 'uncertain';
     byId('draft-form').hidden = created;
+    byId('draft-retry-review').hidden = !uncertain;
+    byId('draft-absent').required = uncertain;
+    byId('draft-absent').checked = false;
+    byId('create-draft').textContent = uncertain ? 'Retry Create Gmail draft' : 'Create Gmail draft';
     byId('create-draft').disabled = !data.configured;
     status.textContent = created ? `Draft recorded ${dateTime(data.saved.completed_at)}. Check Gmail Drafts to confirm it is unsent.`
       : data.saved ? 'An earlier draft request is pending or uncertain. Check Gmail Drafts and Zapier History before another attempt.'
@@ -145,7 +150,8 @@ byId('draft-form').addEventListener('submit', async (event) => {
   try {
     const response = await fetch('/api/draft', { method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ to: byId('draft-to').value, subject: byId('draft-subject').value,
-        body: byId('draft-body').value, manager_reviewed: byId('draft-reviewed').checked }) });
+        body: byId('draft-body').value, manager_reviewed: byId('draft-reviewed').checked,
+        confirmed_absent: byId('draft-absent').checked }) });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || 'Draft creation failed');
     status.textContent = data.message;

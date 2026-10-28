@@ -87,6 +87,7 @@
           <div class="review-field"><label for="draft-subject">Subject</label><input id="draft-subject" type="text" maxlength="200" required></div>
           <div class="review-field"><label for="draft-body">Body</label><textarea id="draft-body" maxlength="10000" required></textarea></div>
           <div class="review-field"><label><input id="draft-reviewed" type="checkbox" required>I reviewed the recipient, subject and body, and want to create an unsent Gmail draft.</label></div>
+          <div id="draft-retry-review" class="review-field" hidden><label><input id="draft-absent" type="checkbox">I checked Gmail Drafts and Zapier History; this draft was not created.</label></div>
           <button id="create-draft" type="submit">Create Gmail draft</button>
         </form>
       </section>

@@ -33,13 +33,24 @@ export default {
       if (payload?.manager_reviewed !== true) return reply({ error: 'Manager review is required before creating a draft' }, 400);
       const draft = validateDraft(payload);
       const hash = draftHash(plan.import_version, draft);
-      const id = randomUUID();
+      let id = randomUUID();
       const inserted = await database.query(
         `INSERT INTO gmail_draft_requests (id, import_version, draft_sha256, to_address, subject, body, status)
          VALUES ($1,$2,$3,$4,$5,$6,'pending') ON CONFLICT (draft_sha256) DO NOTHING RETURNING id`,
         [id, plan.import_version, hash, draft.to, draft.subject, draft.body],
       );
-      if (!inserted.rowCount) return reply({ error: 'This draft was already requested. Check Gmail Drafts and Zapier History before trying again.' }, 409);
+      if (!inserted.rowCount) {
+        const previous = await database.query('SELECT id, status FROM gmail_draft_requests WHERE draft_sha256 = $1', [hash]);
+        if (previous.rows[0]?.status !== 'uncertain' || payload.confirmed_absent !== true) {
+          return reply({ error: 'This draft was already requested. Check Gmail Drafts and Zapier History before trying again.' }, 409);
+        }
+        const reset = await database.query(
+          `UPDATE gmail_draft_requests SET status = 'pending', provider_result = NULL, completed_at = NULL
+           WHERE id = $1 AND status = 'uncertain' RETURNING id`, [previous.rows[0].id],
+        );
+        if (!reset.rowCount) return reply({ error: 'Another draft attempt is already in progress' }, 409);
+        id = reset.rows[0].id;
+      }
       try {
         const provider = await createGmailDraft(draft);
         const saved = await database.query(
