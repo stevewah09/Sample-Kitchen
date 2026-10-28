@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f4ef">
+    <title>Sample Kitchen Planner</title>
+    <style>
+      :root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #25332e; background: #f6f4ef; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; }
+      main { width: min(900px, calc(100% - 40px)); margin: 64px auto; }
+      header { padding-bottom: 28px; border-bottom: 1px solid #d8ddd5; }
+      .eyebrow { color: #527363; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+      h1 { margin: 10px 0 8px; font-size: clamp(32px, 6vw, 48px); letter-spacing: -.04em; }
+      p { color: #63716b; line-height: 1.6; }
+      .card { margin-top: 24px; padding: 24px; border: 1px solid #d8ddd5; border-radius: 14px; background: #fff; }
+      .status { display: flex; align-items: center; gap: 10px; color: #315c45; font-weight: 650; }
+      .dot { width: 9px; height: 9px; border-radius: 50%; background: #4a9a68; }
+      .sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 18px; }
+      .source { padding: 14px; border-radius: 10px; background: #f6f7f4; font-size: 14px; }
+      .source strong { display: block; margin-bottom: 4px; }
+      footer { margin-top: 22px; color: #77847e; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="eyebrow">Sample Central Kitchen</div>
+        <h1>Kitchen Planner</h1>
+        <p>Plan production, staffing and purchasing from owner-imported operational data.</p>
+      </header>
+      <section class="card" aria-labelledby="setup-title">
+        <div class="status"><span class="dot" aria-hidden="true"></span><span id="setup-title">Application scaffold is running</span></div>
+        <p id="database-status">Checking backend status…</p>
+        <div class="sources" aria-label="Operational data status">
+          <div class="source"><strong>Stock count</strong>Not imported</div>
+          <div class="source"><strong>HR records</strong>Not imported</div>
+          <div class="source"><strong>Weekly orders</strong>Not imported</div>
+        </div>
+      </section>
+      <footer>Reference settings are stored separately from operational imports. No sample plan is shown before imports.</footer>
+    </main>
+    <script>
+      fetch('/api/health').then(async response => {
+        const data = await response.json();
+        document.querySelector('#database-status').textContent = data.database === 'connected'
+          ? 'Backend connected to the planning database.'
+          : data.database === 'not_configured'
+            ? 'Backend is ready; persistent database connection is not configured yet.'
+            : 'Backend is running, but the database is unavailable.';
+      }).catch(() => {
+        document.querySelector('#database-status').textContent = 'Backend health check is unavailable.';
+      });
+    </script>
+  </body>
+</html>
