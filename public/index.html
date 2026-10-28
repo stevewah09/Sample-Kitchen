@@ -35,6 +35,10 @@
       .scroll { overflow-x: auto; }
       table { width: 100%; border-collapse: collapse; font-size: 13px; }
       .draft-text { white-space: pre-wrap; padding: 12px; border-radius: 8px; background: #f6f7f4; }
+      input[type=email], input[type=text], textarea { width: 100%; padding: 9px; border: 1px solid #aebbb2; border-radius: 7px; font: inherit; }
+      textarea { min-height: 260px; resize: vertical; }
+      .review-field { margin-top: 14px; }
+      .review-field input[type=checkbox] { margin-right: 8px; }
       th, td { padding: 8px; border-bottom: 1px solid #d8ddd5; text-align: left; vertical-align: top; }
       th { background: #f6f7f4; }
       [hidden] { display: none !important; }
@@ -73,6 +77,18 @@
         <button id="run-agents" type="button">Run planning agents</button>
         <p id="agent-status" role="status"></p>
         <div id="agent-results"></div>
+      </section>
+      <section id="draft-section" class="card" hidden>
+        <h2>Supplier Gmail draft</h2>
+        <p>Review the recipient, subject and whole-pack quantities. This action creates an unsent draft in your connected Gmail account. It does not send an email or place an order.</p>
+        <p id="draft-status" role="status">Loading draft preview…</p>
+        <form id="draft-form">
+          <div class="review-field"><label for="draft-to">To</label><input id="draft-to" type="email" required></div>
+          <div class="review-field"><label for="draft-subject">Subject</label><input id="draft-subject" type="text" maxlength="200" required></div>
+          <div class="review-field"><label for="draft-body">Body</label><textarea id="draft-body" maxlength="10000" required></textarea></div>
+          <div class="review-field"><label><input id="draft-reviewed" type="checkbox" required>I reviewed the recipient, subject and body, and want to create an unsent Gmail draft.</label></div>
+          <button id="create-draft" type="submit">Create Gmail draft</button>
+        </form>
       </section>
       <footer>Reference settings are seeded on the server. Operational imports and agent results are stored in Postgres.</footer>
     </main>

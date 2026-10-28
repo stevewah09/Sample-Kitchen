@@ -12,6 +12,7 @@
     "seed:reference": "node scripts/seed-reference-data.mjs"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.24.3",
     "pg": "^8.16.3"
   }
 }

@@ -34,6 +34,19 @@ CREATE TABLE IF NOT EXISTS planning_agent_runs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS gmail_draft_requests (
+  id TEXT PRIMARY KEY,
+  import_version TEXT NOT NULL,
+  draft_sha256 TEXT NOT NULL UNIQUE,
+  to_address TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  body TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('pending', 'created', 'uncertain')),
+  provider_result JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  completed_at TIMESTAMPTZ
+);
+
 CREATE INDEX IF NOT EXISTS import_batches_kind_imported_at_idx
   ON import_batches (kind, imported_at DESC);
 

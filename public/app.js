@@ -59,7 +59,7 @@ function renderImports(imports, connected) {
 
 function renderPlan(plan) {
   if (plan?.status !== 'ready') {
-    byId('plan-content').hidden = true; byId('agents-section').hidden = true;
+    byId('plan-content').hidden = true; byId('agents-section').hidden = true; byId('draft-section').hidden = true;
     byId('plan-status').textContent = plan?.missing?.length ? `Still needed: ${plan.missing.join(', ')}.` : 'Waiting for imports.';
     return;
   }
@@ -95,7 +95,8 @@ async function refresh(notice) {
     const state = await stateResponse.json();
     byId('database-status').textContent = `Backend connected to Postgres; reference data seeded.${notice ? ` ${notice}` : ''}`;
     renderImports(state.imports, true); renderPlan(state.plan);
-    if (state.agent_run) renderAgents(state.agent_run);
+    if (state.agent_run) { renderAgents(state.agent_run); await loadDraft(); }
+    else byId('draft-section').hidden = true;
   } catch {
     byId('database-status').textContent = 'Backend health check is unavailable.';
     renderImports({}, false); renderPlan(null);
@@ -116,6 +117,42 @@ function renderAgents(run) {
   byId('agent-status').textContent = `${run.model} · saved ${dateTime(run.created_at)}`;
 }
 
+async function loadDraft() {
+  const section = byId('draft-section'); section.hidden = false;
+  const status = byId('draft-status');
+  try {
+    const response = await fetch('/api/draft', { cache: 'no-store' });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Could not load draft preview');
+    byId('draft-to').value = data.saved?.to_address || data.preview.to;
+    byId('draft-subject').value = data.saved?.subject || data.preview.subject;
+    byId('draft-body').value = data.saved?.body || data.preview.body;
+    byId('draft-reviewed').checked = false;
+    const created = data.saved?.status === 'created';
+    byId('draft-form').hidden = created;
+    byId('create-draft').disabled = !data.configured;
+    status.textContent = created ? `Draft recorded ${dateTime(data.saved.completed_at)}. Check Gmail Drafts to confirm it is unsent.`
+      : data.saved ? 'An earlier draft request is pending or uncertain. Check Gmail Drafts and Zapier History before another attempt.'
+        : !data.configured ? 'Zapier MCP is not configured on the server. Add ZAPIER_MCP_TOKEN to Vercel Production and redeploy.'
+          : data.preview.classroom_placeholder ? 'Ready for manager review. The recipient is a classroom placeholder.' : 'Ready for manager review.';
+  } catch (error) { status.textContent = error.message; byId('draft-form').hidden = true; }
+}
+
+byId('draft-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const button = byId('create-draft'), status = byId('draft-status');
+  button.disabled = true; status.textContent = 'Creating an unsent Gmail draft…';
+  try {
+    const response = await fetch('/api/draft', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ to: byId('draft-to').value, subject: byId('draft-subject').value,
+        body: byId('draft-body').value, manager_reviewed: byId('draft-reviewed').checked }) });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Draft creation failed');
+    status.textContent = data.message;
+    byId('draft-form').hidden = true;
+  } catch (error) { status.textContent = error.message; button.disabled = false; }
+});
+
 byId('run-agents').addEventListener('click', async () => {
   const button = byId('run-agents'), status = byId('agent-status');
   button.disabled = true; status.textContent = 'Running the three planning agents…';
@@ -123,7 +160,7 @@ byId('run-agents').addEventListener('click', async () => {
     const response = await fetch('/api/agents', { method: 'POST' });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Agent call failed');
-    renderAgents(result);
+    renderAgents(result); await loadDraft();
   } catch (error) { status.textContent = `Agent run failed: ${error.message}. The verified numeric plan remains available.`; }
   finally { button.disabled = false; }
 });
